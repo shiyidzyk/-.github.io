@@ -30,6 +30,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (audioPlayer.paused) {
             audioPlayer.play();
         }
+        // 翻回正面时自动停止音乐
+        if (!this.classList.contains('flipped')) {
+            audioPlayer.pause();
+        }
         if (this.classList.contains('flipped')) {
             startTypewriter();
         } else {
@@ -99,7 +103,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];
     
-    let currentSongIndex = 0;
+    // 随机选择第一首歌
+    let currentSongIndex = Math.floor(Math.random() * songs.length);
     
     // 更新歌曲信息
     function loadSong(song) {
@@ -236,14 +241,23 @@ document.addEventListener('DOMContentLoaded', function() {
     durationEl.textContent = '0:00';
     currentTimeEl.textContent = '0:00';
 
-    // 网站加载后自动播放音乐，若被阻止则等待用户首次点击页面再播放
+    // 自动播放音乐，若被阻止则等待用户首次点击页面再播放
     function tryAutoPlay() {
-        audioPlayer.play().catch(() => {
+        audioPlayer.play().then(() => {
+            playBtn.textContent = '⏸';
+        }).catch(() => {
             document.body.addEventListener('click', userPlayOnce, { once: true });
         });
     }
     function userPlayOnce() {
         audioPlayer.play();
     }
+    // 监听audio播放/暂停事件，同步按钮状态
+    audioPlayer.addEventListener('play', function() {
+        playBtn.textContent = '⏸';
+    });
+    audioPlayer.addEventListener('pause', function() {
+        playBtn.textContent = '▶';
+    });
     tryAutoPlay();
 });
